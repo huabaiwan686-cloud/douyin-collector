@@ -1,7 +1,12 @@
 #!/bin/bash
 # 抖音采集工具一键部署（Ubuntu 24.04）
-# 在服务器上执行：curl -sSL https://raw.githubusercontent.com/huabaiwan686-cloud/douyin-collector/master/scripts/bootstrap.sh | bash
 set -e
+
+# 非 root 时自动提权
+if [ "$EUID" -ne 0 ]; then
+  echo "需要管理员权限，正在提权…"
+  exec sudo bash "$0" "$@"
+fi
 
 echo "=== 1/6 安装系统依赖 ==="
 apt update -qq && apt install -y -qq python3.12 python3.12-venv xvfb curl > /dev/null 2>&1
