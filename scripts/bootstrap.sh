@@ -14,7 +14,8 @@ echo OK
 
 echo "=== 2/6 安装 cloudflared（内网穿透） ==="
 if ! command -v cloudflared &> /dev/null; then
-  curl -sSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
+  curl -sSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared 2>/dev/null \
+  || curl -sSL https://gh-proxy.com/https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
   chmod +x /usr/local/bin/cloudflared
 fi
 echo OK
@@ -31,7 +32,10 @@ echo OK
 
 echo "=== 4/6 安装 Python 依赖（约 3-5 分钟） ==="
 python3.12 -m venv venv 2>/dev/null || true
-venv/bin/pip install -q -r requirements.txt
+# 阿里云内网用阿里镜像源极速
+venv/bin/pip install -q -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+# Playwright 浏览器用国内镜像
+export PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/
 venv/bin/playwright install chromium 2>&1 | tail -1
 venv/bin/playwright install-deps chromium > /dev/null 2>&1 || true
 echo OK
