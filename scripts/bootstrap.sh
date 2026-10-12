@@ -1,11 +1,11 @@
 #!/bin/bash
 # 抖音采集工具一键部署（Ubuntu 24.04）
+# 请用 root 或 sudo 运行：sudo bash bootstrap.sh
 set -e
 
-# 非 root 时自动提权
 if [ "$EUID" -ne 0 ]; then
-  echo "需要管理员权限，正在提权…"
-  exec sudo bash "$0" "$@"
+  echo "请用 sudo 运行：curl -sSL <地址> -o /tmp/bootstrap.sh && sudo bash /tmp/bootstrap.sh"
+  exit 1
 fi
 
 echo "=== 1/6 安装系统依赖 ==="
