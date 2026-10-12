@@ -270,16 +270,29 @@ class Worker:
             print("已登录。")
             page = await ctx.new_page()
             print("Worker 启动，轮询任务中…")
+            idle_cycles = 0
             while True:
-                task = (SearchTask
-                        .select()
-                        .where(SearchTask.status == "pending")
-                        .order_by(SearchTask.created_at)
-                        .first())
-                if task:
-                    print(f"执行任务 #{task.id}（{task.task_type}）")
-                    await self.run_task(task, page)
-                else:
+                try:
+                    # 页面挂了就重建
+                    if page.is_closed():
+                        print("页面已关闭，重建…")
+                        page = await ctx.new_page()
+                    task = (SearchTask
+                            .select()
+                            .where(SearchTask.status == "pending")
+                            .order_by(SearchTask.created_at)
+                            .first())
+                    if task:
+                        idle_cycles = 0
+                        print(f"执行任务 #{task.id}（{task.task_type}）")
+                        await self.run_task(task, page)
+                    else:
+                        idle_cycles += 1
+                        if idle_cycles % 12 == 0:  # 每分钟心跳
+                            print("Worker 心跳：等待任务中…")
+                        await asyncio.sleep(5)
+                except Exception as e:
+                    print(f"轮询异常（5秒后重试）：{e}")
                     await asyncio.sleep(5)
         finally:
             await ctx.close()
