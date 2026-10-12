@@ -1,0 +1,15 @@
+[Unit]
+Description=Douyin Collector Web UI
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/douyin-collector
+Environment="PATH=/opt/douyin-collector/venv/bin"
+ExecStart=/opt/douyin-collector/venv/bin/python run.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

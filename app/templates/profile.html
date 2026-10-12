@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}创作者主页 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>创作者主页</h2>
+<p><a href="javascript:history.back()">← 返回</a></p>
+{% if not user %}
+<div class="card">
+  <p>用户不存在（sec_uid={{ sec_uid }}）。可能尚未采集到该用户，或该账号已注销/私密不可见。</p>
+</div>
+{% else %}
+<div class="card">
+  <h3>{{ user.nickname }}</h3>
+  <table>
+    <tr><th style="width:120px">抖音号</th><td>{{ user.unique_id or "—" }}</td></tr>
+    <tr><th>主页链接</th><td><a href="{{ user.homepage_url }}" target="_blank">{{ user.homepage_url }}</a></td></tr>
+    <tr><th>简介</th><td>{{ user.bio or "—" }}</td></tr>
+    <tr><th>粉丝数</th><td>{{ user.follower_count or 0 }}</td></tr>
+    <tr><th>身份确认</th><td>{{ "已确认" if user.verified else "待核实" }}</td></tr>
+  </table>
+  <form method="post" action="/favorites/add" style="margin-top:12px">
+    <input type="hidden" name="sec_uid" value="{{ user.sec_uid }}">
+    <button class="btn" type="submit">收藏主页</button>
+  </form>
+</div>
+<div class="card">
+  <h3>公开作品（库内已采集）</h3>
+  {% if works %}
+  <table>
+    <tr><th>标题</th><th>点赞</th><th>评论数</th></tr>
+    {% for w in works %}
+    <tr>
+      <td><a href="{{ w.video_url }}" target="_blank">{{ w.title or "—" }}</a></td>
+      <td>{{ w.digg_count or 0 }}</td>
+      <td>{{ w.comment_count or 0 }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>—（库内暂无该作者的作品记录）</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

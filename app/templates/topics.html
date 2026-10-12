@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}话题 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>话题管理</h2>
+
+<div class="card">
+  <h3>新增话题</h3>
+  <form method="post" action="{{ url_for('topics.add') }}" style="display:flex;gap:8px">
+    <input name="name" placeholder="话题名称（不带 #）" style="flex:1">
+    <input name="hashtag_id" placeholder="hashtag_id（可选）" style="flex:1">
+    <button class="btn" type="submit">添加</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>批量导入（每行一个话题名）</h3>
+  <form method="post" action="{{ url_for('topics.batch_import') }}">
+    <textarea name="texts" rows="4" style="width:100%" placeholder="男漂亮&#10;氛围感帅哥&#10;…"></textarea>
+    <div style="margin-top:8px"><button class="btn ghost" type="submit">批量导入</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>话题列表</h3>
+  <table>
+    <tr><th>ID</th><th>话题</th><th>hashtag_id</th><th>状态</th><th>视频数</th><th>评论数</th><th>操作</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.topic.id }}</td>
+      <td>#{{ r.topic.name }}</td>
+      <td>{{ r.topic.hashtag_id or '—' }}</td>
+      <td><span class="badge{% if r.topic.enabled %} ok{% endif %}">{{ '启用' if r.topic.enabled else '禁用' }}</span></td>
+      <td>{{ r.video_count }}</td>
+      <td>{{ r.comment_count }}</td>
+      <td style="white-space:nowrap">
+        <form method="post" action="{{ url_for('topics.collect', topic_id=r.topic.id) }}" style="display:inline"><button class="btn small" type="submit">开始采集</button></form>
+        <form method="post" action="{{ url_for('topics.toggle', topic_id=r.topic.id) }}" style="display:inline"><button class="btn small ghost" type="submit">{{ '禁用' if r.topic.enabled else '启用' }}</button></form>
+        <form method="post" action="{{ url_for('topics.delete', topic_id=r.topic.id) }}" style="display:inline" onsubmit="return confirm('删除话题「{{ r.topic.name }}」？')"><button class="btn small ghost" type="submit">删除</button></form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="color:#999">暂无话题，先添加一个</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+[Unit]
+Description=Douyin Collector Worker (Playwright)
+After=network.target dy-web.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/douyin-collector
+Environment="PATH=/opt/douyin-collector/venv/bin"
+Environment="DISPLAY=:99"
+ExecStartPre=/usr/bin/Xvfb :99 -screen 0 1366x900x24 &
+ExecStart=/opt/douyin-collector/venv/bin/python -m app.worker
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

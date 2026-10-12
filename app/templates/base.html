@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}抖音采集工具{% endblock %}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6f8;color:#222;font-size:14px}
+.nav{background:#161823;color:#fff;padding:0 20px;display:flex;align-items:center;height:52px;position:sticky;top:0;z-index:10}
+.nav a{color:#ccc;text-decoration:none;padding:0 12px;line-height:52px;font-size:13px}
+.nav a:hover,.nav a.on{color:#fff;background:#2a2d3a}
+.nav .logo{color:#fff;font-weight:700;margin-right:16px;font-size:15px}
+.wrap{max-width:1200px;margin:20px auto;padding:0 16px}
+.card{background:#fff;border-radius:8px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.btn{display:inline-block;background:#fe2c55;color:#fff;border:none;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;text-decoration:none}
+.btn:hover{background:#e0264b}
+.btn.ghost{background:#f0f1f4;color:#333}
+.btn.small{padding:4px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid #eee;text-align:left}
+th{background:#fafbfc;color:#666;font-weight:600}
+input,select,textarea{border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px}
+.flash{background:#e6f7ee;border:1px solid #b7e4c7;color:#1a7f37;padding:10px 14px;border-radius:6px;margin-bottom:12px}
+.flash.err{background:#fdecea;border-color:#f5c2c7;color:#b02a37}
+.tree{margin-left:18px;border-left:2px solid #eee;padding-left:12px}
+.cmt{padding:10px 0;border-bottom:1px solid #f0f0f0}
+.cmt .meta{color:#888;font-size:12px;margin-bottom:4px}
+.badge{display:inline-block;background:#eef;color:#445;padding:2px 8px;border-radius:10px;font-size:11px;margin-right:4px}
+.badge.ok{background:#e6f7ee;color:#1a7f37}.badge.warn{background:#fff4e0;color:#b26a00}
+.pager{margin-top:12px;color:#666;font-size:13px}
+.pager a{margin:0 4px;color:#fe2c55;text-decoration:none}
+h2{font-size:18px;margin-bottom:12px}h3{font-size:15px;margin:12px 0 8px}
+</style>
+</head>
+<body>
+<div class="nav">
+<span class="logo">抖音采集</span>
+<a href="/" class="{% if nav=='dashboard' %}on{% endif %}">工作台</a>
+<a href="/keywords" class="{% if nav=='keywords' %}on{% endif %}">关键词</a>
+<a href="/topics" class="{% if nav=='topics' %}on{% endif %}">话题</a>
+<a href="/videos" class="{% if nav=='videos' %}on{% endif %}">作品评论</a>
+<a href="/favorites" class="{% if nav=='favorites' %}on{% endif %}">已收藏</a>
+<a href="/export" class="{% if nav=='export' %}on{% endif %}">导出</a>
+<a href="/tasks" class="{% if nav=='tasks' %}on{% endif %}">任务</a>
+<a href="/settings" class="{% if nav=='settings' %}on{% endif %}">设置</a>
+</div>
+<div class="wrap">
+{% with msgs=get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}
+<div class="flash{% if c=='error' %} err{% endif %}">{{m}}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}
+</div>
+</body>
+</html>

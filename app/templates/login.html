@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}扫码登录 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>抖音小号扫码登录</h2>
+<div class="card">
+  {% if logged_in %}
+    <p><span class="badge ok">已登录</span> 登录态已保存，采集任务可正常运行。</p>
+    <p><a class="btn ghost" href="/settings/">返回设置</a></p>
+  {% elif qr_img %}
+    <p>请用抖音小号 App 扫码（二维码 5 分钟内有效）：</p>
+    <p><img src="data:image/png;base64,{{ qr_img }}" style="max-width:320px;border:1px solid #ddd;border-radius:8px"></p>
+    <p style="color:#888;font-size:12px">页面每 10 秒自动检查登录状态，扫码成功后自动跳转。</p>
+    <p><a class="btn ghost small" href="/settings/login">刷新二维码</a></p>
+    <script>
+    setInterval(function(){
+      fetch('/settings/login/status').then(r=>r.json()).then(d=>{
+        if(d.logged_in){ location.href='/settings/'; }
+        else if(!d.has_qr){ location.reload(); }
+      });
+    }, 10000);
+    </script>
+  {% else %}
+    <p>点击下面按钮，后台会自动打开抖音登录页并抓取二维码。</p>
+    <form method="post" action="/settings/login/start">
+      <button class="btn" type="submit">获取登录二维码</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}评论树 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>评论树</h2>
+
+<div class="card">
+  <h3>{{ video.title or '—' }}</h3>
+  <div style="color:#666;font-size:13px">
+    作者：{{ video.author_nickname or '—' }} · 点赞 {{ video.digg_count }} · 评论 {{ video.comment_count }} ·
+    <a href="{{ url_for('videos.detail', aweme_id=video.aweme_id) }}">列表视图</a>
+  </div>
+</div>
+
+<div class="card">
+  <form method="get" action="{{ url_for('tree.show', aweme_id=video.aweme_id) }}" style="display:flex;gap:8px">
+    <input name="q" value="{{ q }}" placeholder="按评论关键词搜索" style="flex:1">
+    <select name="sort">
+      <option value="digg" {% if sort=='digg' %}selected{% endif %}>按点赞数</option>
+      <option value="time" {% if sort=='time' %}selected{% endif %}>按时间</option>
+    </select>
+    <button class="btn ghost" type="submit">搜索</button>
+  </form>
+</div>
+
+<div class="card">
+  {% for c, replies in tree %}
+  <details open style="margin-bottom:10px;border:1px solid #f0f0f0;border-radius:6px;padding:8px 10px">
+    <summary style="cursor:pointer">
+      <strong>{% if c.user %}<a href="/profile/{{ c.user.sec_uid }}">{{ c.user.nickname }}</a>{% else %}—{% endif %}</strong>
+      <span class="meta" style="color:#888;font-size:12px"> 👍 {{ c.digg_count }} · {{ c.create_time.strftime('%Y-%m-%d %H:%M') if c.create_time else '—' }} · {{ replies|length }} 条回复</span>
+      {% if c.user %}
+      <form method="post" action="/favorites/add" style="display:inline;margin-left:8px" onclick="event.stopPropagation()">
+        <input type="hidden" name="sec_uid" value="{{ c.user.sec_uid }}">
+        <input type="hidden" name="trigger_comment" value="{{ c.text }}">
+        <button class="btn small" type="submit">收藏主页</button>
+      </form>
+      {% endif %}
+      <div style="margin-top:4px">{{ c.text }}</div>
+    </summary>
+    <div class="tree">
+      {% for r in replies %}
+      <div class="cmt">
+        <div class="meta">
+          {% if r.user %}<a href="/profile/{{ r.user.sec_uid }}">{{ r.user.nickname }}</a>{% else %}—{% endif %}
+          · 👍 {{ r.digg_count }} · {{ r.create_time.strftime('%Y-%m-%d %H:%M') if r.create_time else '—' }}{% if r.ip_label %} · {{ r.ip_label }}{% endif %}
+          {% if r.user %}
+          <form method="post" action="/favorites/add" style="display:inline;margin-left:8px">
+            <input type="hidden" name="sec_uid" value="{{ r.user.sec_uid }}">
+            <input type="hidden" name="trigger_comment" value="{{ r.text }}">
+            <button class="btn small" type="submit">收藏主页</button>
+          </form>
+          {% endif %}
+        </div>
+        <div>{{ r.text }}</div>
+      </div>
+      {% else %}
+      <div style="color:#999;font-size:12px;padding:6px 0">暂无楼中楼回复</div>
+      {% endfor %}
+    </div>
+  </details>
+  {% else %}
+  <div style="color:#999">暂无评论{% if q %}（关键词“{{ q }}”无匹配）{% endif %}</div>
+  {% endfor %}
+</div>
+{% endblock %}

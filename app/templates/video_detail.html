@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}视频评论 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>视频评论</h2>
+
+<div class="card">
+  <h3>{{ video.title or '—' }}</h3>
+  <div style="color:#666;font-size:13px">
+    作者：{{ video.author_nickname or '—' }} ·
+    点赞 {{ video.digg_count }} · 评论 {{ video.comment_count }} ·
+    <a href="{{ video.video_url }}" target="_blank">原作品链接</a> ·
+    <a href="{{ url_for('tree.show', aweme_id=video.aweme_id) }}">评论树视图</a>
+  </div>
+  {% if video.source_keyword %}<span class="badge">{{ video.source_keyword }}</span>{% endif %}
+  {% if video.source_topic %}<span class="badge">#{{ video.source_topic }}</span>{% endif %}
+</div>
+
+<div class="card">
+  <h3>一级评论（{{ total }}）</h3>
+  {% for c in comments %}
+  <div class="cmt">
+    <div class="meta">
+      {% if c.user %}<a href="/profile/{{ c.user.sec_uid }}">{{ c.user.nickname }}</a>{% else %}—{% endif %}
+      · 👍 {{ c.digg_count }} · {{ c.create_time.strftime('%Y-%m-%d %H:%M') if c.create_time else '—' }}{% if c.ip_label %} · {{ c.ip_label }}{% endif %} · 回复 {{ c.reply_total }}
+      {% if c.user %}
+      <form method="post" action="/favorites/add" style="display:inline;margin-left:8px">
+        <input type="hidden" name="sec_uid" value="{{ c.user.sec_uid }}">
+        <input type="hidden" name="trigger_comment" value="{{ c.text }}">
+        <button class="btn small" type="submit">收藏主页</button>
+      </form>
+      {% endif %}
+    </div>
+    <div>{{ c.text }}</div>
+  </div>
+  {% else %}
+  <div style="color:#999">暂无评论</div>
+  {% endfor %}
+  <div class="pager">
+    {% if page > 1 %}<a href="{{ url_for('videos.detail', aweme_id=video.aweme_id, page=page-1) }}">上一页</a>{% endif %}
+    {{ page }} / {{ pages }}
+    {% if page < pages %}<a href="{{ url_for('videos.detail', aweme_id=video.aweme_id, page=page+1) }}">下一页</a>{% endif %}
+  </div>
+</div>
+{% endblock %}

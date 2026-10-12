@@ -1,0 +1,23 @@
+# 复制为 config.yaml 后修改
+server:
+  host: "0.0.0.0"
+  port: 5000
+
+database:
+  path: "data/collector.db"   # SQLite；后期可换 PostgreSQL（改 models.py 的 db 绑定）
+
+browser:
+  user_data_dir: "data/browser_profile"  # 登录态持久化目录，备份它即备份登录
+  headless: false        # 服务器无桌面时设 true；若被抖音检测再改 xvfb 方案
+  slow_mo_ms: 50
+
+crawl:
+  request_delay_min_s: 1.5   # 请求间隔下限（保守防风控）
+  request_delay_max_s: 3.5   # 请求间隔上限
+  max_retries: 3
+  comments_per_video: 200    # 每视频最多采一级评论数
+  replies_per_comment: 50    # 每条一级最多采二级回复数
+  max_videos_per_keyword: 50 # 每个关键词最多处理视频数
+
+export:
+  favorite_threshold: 100    # 收藏数量阈值，达到后提示

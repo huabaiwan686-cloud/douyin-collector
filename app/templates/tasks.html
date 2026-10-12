@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}采集任务 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>采集任务</h2>
+{% if error_task %}
+<div class="card">
+  <h3>任务 #{{ error_task.id }} 错误日志
+    <a class="btn small ghost" href="/tasks/">返回任务列表</a></h3>
+  <table>
+    <tr><th>时间</th><th>级别</th><th>阶段</th><th>信息</th></tr>
+    {% for e in error_logs %}
+    <tr>
+      <td>{{ e.created_at.strftime('%m-%d %H:%M:%S') if e.created_at else "—" }}</td>
+      <td>{{ e.level }}</td>
+      <td>{{ e.stage }}</td>
+      <td>{{ e.message }}{% if e.detail %}<br><small style="color:#888">{{ e.detail[:300] }}</small>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">无错误日志</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% else %}
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>类型</th><th>目标</th><th>状态</th><th>进度</th><th>评论数</th><th>重试</th><th>错误</th><th>操作</th></tr>
+    {% for t in items %}
+    <tr>
+      <td>{{ t.id }}</td>
+      <td>{{ type_labels.get(t.task_type, t.task_type) }}</td>
+      <td>{{ t.keyword.text if t.keyword else (t.topic.name if t.topic else (t.video_url or "—")) }}</td>
+      <td><span class="badge{% if t.status=='done' %} ok{% elif t.status=='failed' %} warn{% endif %}">{{ status_labels.get(t.status, t.status) }}</span></td>
+      <td>{{ t.done_videos }}/{{ t.total_videos }}</td>
+      <td>{{ t.total_comments }}</td>
+      <td>{{ t.retry_count }}</td>
+      <td>{{ (t.error or "—")[:40] }}</td>
+      <td>
+        {% if t.status == 'running' %}
+        <form method="post" action="/tasks/{{ t.id }}/pause" style="display:inline"><button class="btn small ghost" type="submit">暂停</button></form>
+        {% endif %}
+        {% if t.status == 'paused' %}
+        <form method="post" action="/tasks/{{ t.id }}/resume" style="display:inline"><button class="btn small ghost" type="submit">继续</button></form>
+        {% endif %}
+        {% if t.status in ('running','paused','pending') %}
+        <form method="post" action="/tasks/{{ t.id }}/cancel" style="display:inline" onsubmit="return confirm('取消任务？')"><button class="btn small ghost" type="submit">取消</button></form>
+        {% endif %}
+        {% if t.status == 'failed' %}
+        <form method="post" action="/tasks/{{ t.id }}/retry" style="display:inline"><button class="btn small" type="submit">重试</button></form>
+        {% endif %}
+        <a class="btn small ghost" href="/tasks/{{ t.id }}/errors">日志</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9">暂无任务</td></tr>
+    {% endfor %}
+  </table>
+  <div class="pager">第 {{ page }} / {{ pages }} 页
+    {% if page > 1 %}<a href="?page={{ page-1 }}">上一页</a>{% endif %}
+    {% if page < pages %}<a href="?page={{ page+1 }}">下一页</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

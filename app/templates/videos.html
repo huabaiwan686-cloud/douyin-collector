@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}作品评论 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>作品与评论结果</h2>
+
+<div class="card">
+  <form method="get" action="{{ url_for('videos.index') }}" style="display:flex;gap:8px;flex-wrap:wrap">
+    <input name="keyword" value="{{ kw }}" placeholder="按关键词筛选">
+    <input name="topic" value="{{ topic }}" placeholder="按话题筛选">
+    <select name="sort">
+      <option value="latest" {% if sort=='latest' %}selected{% endif %}>最新入库</option>
+      <option value="digg" {% if sort=='digg' %}selected{% endif %}>按点赞数</option>
+      <option value="comments" {% if sort=='comments' %}selected{% endif %}>按评论数</option>
+    </select>
+    <button class="btn ghost" type="submit">筛选</button>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>作品</th><th>作者</th><th>点赞</th><th>评论数</th><th>来源</th><th>操作</th></tr>
+    {% for v in videos %}
+    <tr>
+      <td style="max-width:320px"><a href="{{ url_for('videos.detail', aweme_id=v.aweme_id) }}">{{ v.title[:60] if v.title else v.aweme_id }}</a></td>
+      <td>{{ v.author_nickname or '—' }}</td>
+      <td>{{ v.digg_count }}</td>
+      <td>{{ v.comment_count }}</td>
+      <td>{% if v.source_keyword %}<span class="badge">{{ v.source_keyword }}</span>{% endif %}{% if v.source_topic %}<span class="badge">#{{ v.source_topic }}</span>{% endif %}{% if not v.source_keyword and not v.source_topic %}—{% endif %}</td>
+      <td style="white-space:nowrap">
+        <a class="btn small ghost" href="{{ url_for('videos.detail', aweme_id=v.aweme_id) }}">评论</a>
+        <a class="btn small ghost" href="{{ url_for('tree.show', aweme_id=v.aweme_id) }}">评论树</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="color:#999">暂无视频，先创建采集任务</td></tr>
+    {% endfor %}
+  </table>
+  <div class="pager">
+    共 {{ total }} 条
+    {% if page > 1 %}<a href="{{ url_for('videos.index', page=page-1, keyword=kw, topic=topic, sort=sort) }}">上一页</a>{% endif %}
+    {{ page }} / {{ pages }}
+    {% if page < pages %}<a href="{{ url_for('videos.index', page=page+1, keyword=kw, topic=topic, sort=sort) }}">下一页</a>{% endif %}
+  </div>
+</div>
+{% endblock %}

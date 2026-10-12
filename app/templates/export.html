@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}批量导出 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>批量导出</h2>
+<div class="card">
+  <p>当前筛选下：共 <b>{{ total }}</b> 条收藏，去重后 <b>{{ distinct }}</b> 条主页链接
+    {% if dup %}（重复 {{ dup }} 条）{% endif %}</p>
+  {% if over %}
+  <p class="badge ok">已达到收藏阈值 {{ threshold }}，可以批量提取</p>
+  {% else %}
+  <p>收藏阈值：{{ threshold }}（config.yaml export.favorite_threshold），还差 {{ threshold - total }} 条</p>
+  {% endif %}
+</div>
+<div class="card">
+  <h3>导出文件</h3>
+  <p>
+    <a class="btn small" href="/export/csv?{{ args_str }}">导出 CSV</a>
+    <a class="btn small" href="/export/excel?{{ args_str }}">导出 Excel</a>
+    <a class="btn small" href="/export/json?{{ args_str }}">导出 JSON</a>
+  </p>
+  <p style="color:#888;font-size:12px">字段：昵称、抖音号、主页链接、简介、粉丝数、来源关键词、来源话题、来源作品、触发评论、备注、标签、审核状态、收藏时间</p>
+</div>
+<div class="card">
+  <h3>一键复制全部链接（一行一条）</h3>
+  <textarea id="urlBox" rows="8" style="width:100%" readonly>{{ urls }}</textarea>
+  <p style="margin-top:8px">
+    <button class="btn small" onclick="copyUrls()">复制全部链接</button>
+    <span id="copyMsg" style="color:#1a7f37;margin-left:8px"></span>
+  </p>
+</div>
+<script>
+function copyUrls(){
+  var t=document.getElementById('urlBox').value;
+  if(!t.trim()){document.getElementById('copyMsg').textContent='没有可复制的链接';return;}
+  navigator.clipboard.writeText(t).then(function(){
+    document.getElementById('copyMsg').textContent='已复制 '+t.trim().split('\n').length+' 条链接';
+  },function(){document.getElementById('copyMsg').textContent='复制失败：浏览器拒绝剪贴板访问';});
+}
+</script>
+{% endblock %}

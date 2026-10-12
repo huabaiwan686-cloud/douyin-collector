@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}设置 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>设置</h2>
+<div class="card">
+  <h3>配置（config.yaml，只读）</h3>
+  {% for sec, kv in sections.items() %}
+  <h3 style="color:#666">[{{ sec }}]</h3>
+  <table>
+    {% for k, v in kv.items() %}<tr><th style="width:220px">{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
+  </table>
+  {% endfor %}
+</div>
+<div class="card">
+  <h3>登录状态</h3>
+  {% if login_ok %}
+  <p><span class="badge ok">已登录</span> 检测到浏览器登录态目录：{{ profile_dir }}</p>
+  {% else %}
+  <p><span class="badge warn">未登录</span> 未检测到登录态（{{ profile_dir }} 不存在或为空）。</p>
+  <p style="color:#888;font-size:12px">重新登录：在服务器上运行扫码登录脚本，用小号扫码后，登录态会持久化到该目录，此后采集自动携带登录态。</p>
+  {% endif %}
+</div>
+<div class="card">
+  <h3>数据备份</h3>
+  <p>数据库：{{ db_path }}（{{ "存在" if db_exists else "不存在" }}）</p>
+  <form method="post" action="/settings/backup">
+    <button class="btn small" type="submit">备份数据库</button>
+  </form>
+  <h3>已有备份</h3>
+  <table>
+    <tr><th>文件名</th><th>大小</th><th>时间</th></tr>
+    {% for b in backups %}
+    <tr><td>{{ b.name }}</td><td>{{ b.kb }} KB</td><td>{{ b.time }}</td></tr>
+    {% else %}
+    <tr><td colspan="3">暂无备份</td></tr>
+    {% endfor %}
+  </table>
+</div>
+<div class="card">
+  <h3>日志（最近 100 条）</h3>
+  <table>
+    <tr><th>时间</th><th>任务</th><th>级别</th><th>阶段</th><th>信息</th></tr>
+    {% for e in logs %}
+    <tr>
+      <td>{{ e.created_at.strftime('%m-%d %H:%M:%S') if e.created_at else "—" }}</td>
+      <td>{{ e.task.id if e.task else "—" }}</td>
+      <td>{{ e.level }}</td>
+      <td>{{ e.stage }}</td>
+      <td>{{ e.message[:120] }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">无日志</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

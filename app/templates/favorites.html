@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}已收藏主页 - 抖音采集工具{% endblock %}
+{% block body %}
+<h2>已收藏主页（共 {{ total }} 条）</h2>
+<div class="card">
+  <form method="get" action="/favorites/">
+    关键词 <input name="keyword" value="{{ args.get('keyword','') }}" size="12">
+    话题 <input name="topic" value="{{ args.get('topic','') }}" size="12">
+    状态 <select name="status">
+      <option value="">全部</option>
+      {% for k,v in labels.items() %}<option value="{{ k }}" {% if args.get('status')==k %}selected{% endif %}>{{ v }}</option>{% endfor %}
+    </select>
+    标签 <input name="tag" value="{{ args.get('tag','') }}" size="10">
+    昵称 <input name="q" value="{{ args.get('q','') }}" size="12">
+    <button class="btn small" type="submit">筛选</button>
+    <a class="btn small ghost" href="/favorites/">清空</a>
+  </form>
+</div>
+<div class="card">
+  <table>
+    <tr>
+      <th><input type="checkbox" id="checkAll"></th>
+      <th>昵称</th><th>抖音号</th><th>来源</th><th>收藏时间</th><th>审核状态</th><th>备注/标签</th><th>操作</th>
+    </tr>
+    {% for f in items %}
+    <tr>
+      <td><input type="checkbox" class="rowCheck" value="{{ f.id }}"></td>
+      <td><a href="/profile/{{ f.user.sec_uid }}">{{ f.nickname_snapshot }}</a></td>
+      <td>{{ f.user.unique_id or "—" }}</td>
+      <td>{{ f.source_keyword or f.source_topic or "—" }}</td>
+      <td>{{ f.created_at.strftime('%m-%d %H:%M') if f.created_at else "—" }}</td>
+      <td>
+        <form method="post" action="/favorites/{{ f.id }}/update" style="display:inline">
+          <select name="review_status" onchange="this.form.submit()">
+            {% for k,v in labels.items() %}<option value="{{ k }}" {% if f.review_status==k %}selected{% endif %}>{{ v }}</option>{% endfor %}
+          </select>
+          <input type="hidden" name="note" value="{{ f.note or '' }}">
+          <input type="hidden" name="tags" value="{{ f.tags or '' }}">
+        </form>
+      </td>
+      <td>
+        <form method="post" action="/favorites/{{ f.id }}/update">
+          <input name="note" value="{{ f.note or '' }}" size="12" placeholder="备注">
+          <input name="tags" value="{{ f.tags or '' }}" size="8" placeholder="标签">
+          <input type="hidden" name="review_status" value="{{ f.review_status }}">
+          <button class="btn small ghost" type="submit">保存</button>
+        </form>
+      </td>
+      <td>
+        <form method="post" action="/favorites/{{ f.id }}/delete" style="display:inline" onsubmit="return confirm('取消收藏？')">
+          <button class="btn small ghost" type="submit">取消收藏</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8">暂无收藏</td></tr>
+    {% endfor %}
+  </table>
+  <form method="post" action="/favorites/batch" id="batchForm" onsubmit="return collectIds(this)">
+    <div style="margin-top:10px">
+      <button class="btn small" type="submit" name="action" value="status:approved">批量→符合条件</button>
+      <button class="btn small" type="submit" name="action" value="status:rejected">批量→不符合条件</button>
+      <button class="btn small" type="submit" name="action" value="status:pending">批量→待审核</button>
+      <button class="btn small ghost" type="submit" name="action" value="delete" onclick="return confirm('批量取消收藏？')">批量取消收藏</button>
+      <a class="btn small ghost" href="#" id="exportSel">导出选中 →</a>
+    </div>
+  </form>
+  <div class="pager">第 {{ page }} / {{ pages }} 页
+    {% if page > 1 %}<a href="?page={{ page-1 }}{% if qstr %}&{{ qstr }}{% endif %}">上一页</a>{% endif %}
+    {% if page < pages %}<a href="?page={{ page+1 }}{% if qstr %}&{{ qstr }}{% endif %}">下一页</a>{% endif %}
+  </div>
+</div>
+<script>
+document.getElementById('checkAll').onclick=function(){var c=this.checked;document.querySelectorAll('.rowCheck').forEach(function(x){x.checked=c;});};
+function selIds(){var a=[];document.querySelectorAll('.rowCheck:checked').forEach(function(x){a.push(x.value);});return a;}
+function collectIds(form){var a=selIds();if(!a.length){alert('请先勾选');return false;}
+  var h=document.createElement('input');h.type='hidden';h.name='ids';h.value=a.join(',');form.appendChild(h);return true;}
+document.getElementById('exportSel').onclick=function(){var a=selIds();if(!a.length){alert('请先勾选');return false;}
+  location.href='/export/?ids='+a.join(',');return false;};
+</script>
+{% endblock %}
