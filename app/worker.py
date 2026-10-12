@@ -263,9 +263,11 @@ class Worker:
             headless=cfg_b.get("headless", False),
         )
         try:
-            if not await is_logged_in(ctx):
-                print("未登录！请先运行 python -m app.collector.browser --login 扫码登录。")
-                return
+            # 等登录：每 10 秒检查一次，直到登录成功
+            while not await is_logged_in(ctx):
+                print("等待扫码登录…（请在网页 设置→扫码登录 完成）")
+                await asyncio.sleep(10)
+            print("已登录。")
             page = await ctx.new_page()
             print("Worker 启动，轮询任务中…")
             while True:
